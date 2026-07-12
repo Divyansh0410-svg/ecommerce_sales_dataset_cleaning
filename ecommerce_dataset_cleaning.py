@@ -24,8 +24,9 @@ ecom_data.drop(drop_columns, axis=1, inplace=True)
 logging.info(f'Tracking dropped columns, Remaining columns are; {list(ecom_data.columns)}')
 
 #Converting order_date format from str to datetime
-ecom_data['order_date']=pd.to_datetime(ecom_data['order_date'], errors='coerce')
-logging.info(f'Converting dtype of order_date column to datetime')
+ecom_data['order_date']=pd.to_datetime(ecom_data['order_date'], errors='coerce', format='mixed')
+ecom_data.dropna(subset=['order_date'], inplace=True)
+logging.info(f'Converting dtype of order_date column to datetime and dropping null values')
 
 #Converting columns like price,total and quantity to float and integer respectively 
 #and dropping columns with non numerical value
@@ -64,3 +65,4 @@ if remaining_nulls==0:
 else:
     logging.critical(f'FINAL QUALITY GATE FAILED: {remaining_nulls} null values still remains in numeric columns')
     raise ValueError('Pipeline halted: Numeric columns have not healed perfectly')
+ecom_data.info()
