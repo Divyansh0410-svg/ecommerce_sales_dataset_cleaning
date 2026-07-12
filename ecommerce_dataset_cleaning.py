@@ -49,17 +49,14 @@ numeric_column=['price','quantity','total']
 for col in numeric_column:
     if col=='quantity':
         ecom_data[col]=ecom_data.groupby('category')[col].transform(lambda x: x.fillna(np.round(x.mean())))
+        #Incase whole quantity column is empty
+        global_qty=int(np.round(ecom_data[col].mean()))
+        ecom_data[col]=ecom_data[col].fillna(global_qty)
     else:  
         ecom_data[col]=ecom_data.groupby('category')[col].transform(lambda x: x.fillna(x.mean()))
-
-print("\n=== DATA PIPELINE DEBUG AUDIT ===")
-print("Data Types of your columns:")
-print(ecom_data[numeric_column].dtypes)
-print("\nExact Null Count per Column:")
-print(ecom_data[numeric_column].isnull().sum())
-print("\nFirst 5 rows still containing null values:")
-print(ecom_data[ecom_data[numeric_column].isnull().any(axis=1)][['category'] + numeric_column].head())
-print("=================================\n")
+        #Incase whole quantity column is empty
+        global_val=ecom_data[col].mean()
+        ecom_data[col]=ecom_data[col].fillna(global_val)
 
 remaining_nulls= ecom_data[numeric_column].isnull().sum().sum()
 if remaining_nulls==0:
