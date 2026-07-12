@@ -65,4 +65,15 @@ if remaining_nulls==0:
 else:
     logging.critical(f'FINAL QUALITY GATE FAILED: {remaining_nulls} null values still remains in numeric columns')
     raise ValueError('Pipeline halted: Numeric columns have not healed perfectly')
-ecom_data.info()
+
+#Checking for duplicates and removing if any
+duplicate_count=ecom_data.duplicated().sum()
+if duplicate_count>0:
+    logging.warning(f'DUPLICATE ROWS DETECTED...removing them')
+    ecom_data.drop_duplicates(inplace=True)
+    logging.info(f'Removed {duplicate_count} duplicated rows')
+else:
+    logging.info(f' NO DUPLICATE VALUES EXISTS')
+
+#Forcing total equal to quantity*price to fix any incorrect total
+ecom_data['total']=ecom_data['quantity']*ecom_data['price']
