@@ -45,6 +45,9 @@ else:
     #Physically stopping the script
     raise ValueError('Pipleline halted due to unhealed missing values')
 
+#Removing space from category column values as well
+ecom_data['category']=ecom_data['category'].str.strip().str.lower()
+
 #Dealing with null values in price quantity and total columns
 numeric_column=['price','quantity','total']
 for col in numeric_column:
@@ -77,3 +80,9 @@ else:
 
 #Forcing total equal to quantity*price to fix any incorrect total
 ecom_data['total']=ecom_data['quantity']*ecom_data['price']
+
+#Saving the cleaned dataset to new file
+ecom_data.to_csv('cleaned_ecommerce_sales_data.csv', index=False)
+logging.info(f'Pipeline complete: Cleaned file exported to {'cleaned_ecommerce_sales_data.csv'} file. Final shape is {ecom_data.shape}')
+
+
