@@ -14,7 +14,6 @@ logging.basicConfig(
 #Reading and loading the raw dataset
 ecom_data=pd.read_csv('messy_ecommerce_sales_data.csv')
 logging.info(f"Succesfully loaded the the file, initial shape is: {ecom_data.shape}")
-ecom_data.info()
 
 #Stip the unwanted space of the column headers and turning them in lowercase
 ecom_data.columns=ecom_data.columns.str.strip().str.lower()
@@ -27,3 +26,10 @@ logging.info(f'Tracking dropped columns, Remaining columns are; {list(ecom_data.
 #Converting order_date format from str to datetime
 ecom_data['order_date']=pd.to_datetime(ecom_data['order_date'], errors='coerce')
 logging.info(f'Converting dtype of order_date column to datetime')
+
+#Converting columns like price and quantity to float and integer respectively 
+# and dropping columns with non numerical value
+ecom_data['quantity']=pd.to_numeric(ecom_data['quantity'], errors='coerce').astype('Int64')
+ecom_data['price']=pd.to_numeric(ecom_data['price'], errors='coerce').astype('Float64')
+logging.info(f'Convertion of price and quantity columns to int and float is successfull')
+ecom_data.info()
