@@ -27,18 +27,43 @@ logging.info(f'Tracking dropped columns, Remaining columns are; {list(ecom_data.
 ecom_data['order_date']=pd.to_datetime(ecom_data['order_date'], errors='coerce')
 logging.info(f'Converting dtype of order_date column to datetime')
 
-#Converting columns like price and quantity to float and integer respectively 
+#Converting columns like price,total and quantity to float and integer respectively 
 #and dropping columns with non numerical value
 ecom_data['quantity']=pd.to_numeric(ecom_data['quantity'], errors='coerce').astype('Int64')
 ecom_data['price']=pd.to_numeric(ecom_data['price'], errors='coerce').astype('Float64')
-logging.info(f'Convertion of price and quantity columns to int and float is successfull')
+ecom_data['total']=pd.to_numeric(ecom_data['total'], errors='coerce').astype('Float64')
+logging.info(f'Convertion of price, total and quantity columns to int and float is successfull')
 
 #Dropping rows with missing category
 missing_category= ecom_data['category'].isnull().sum()
 ecom_data.dropna(subset=['category'], inplace=True)
 if ecom_data['category'].isnull().sum()==0:
-    logging.info('QUALITY GATE PASSES: No missing value remains')
+    logging.info('QUALITY GATE PASSES: No missing value remains in category column')
 else:
     logging.critical(f'QUALITY GATE FAILED: Found {missing_category} null values')
     #Physically stopping the script
     raise ValueError('Pipleline halted due to unhealed missing values')
+
+#Dealing with null values in price quantity and total columns
+numeric_column=['price','quantity','total']
+for col in numeric_column:
+    if col=='quantity':
+        ecom_data[col]=ecom_data.groupby('category')[col].transform(lambda x: x.fillna(np.round(x.mean())))
+    else:  
+        ecom_data[col]=ecom_data.groupby('category')[col].transform(lambda x: x.fillna(x.mean()))
+
+print("\n=== DATA PIPELINE DEBUG AUDIT ===")
+print("Data Types of your columns:")
+print(ecom_data[numeric_column].dtypes)
+print("\nExact Null Count per Column:")
+print(ecom_data[numeric_column].isnull().sum())
+print("\nFirst 5 rows still containing null values:")
+print(ecom_data[ecom_data[numeric_column].isnull().any(axis=1)][['category'] + numeric_column].head())
+print("=================================\n")
+
+remaining_nulls= ecom_data[numeric_column].isnull().sum().sum()
+if remaining_nulls==0:
+    logging.info(f'FINAL QUALITY GATE PASSED: All null values have been removed , column is healed')
+else:
+    logging.critical(f'FINAL QUALITY GATE FAILED: {remaining_nulls} null values still remains in numeric columns')
+    raise ValueError('Pipeline halted: Numeric columns have not healed perfectly')
