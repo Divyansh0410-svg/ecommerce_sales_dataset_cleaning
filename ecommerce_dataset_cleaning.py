@@ -23,3 +23,7 @@ ecom_data.columns=ecom_data.columns.str.strip().str.lower()
 drop_columns=['id','customer_name','order_id']
 ecom_data.drop(drop_columns, axis=1, inplace=True)
 logging.info(f'Tracking dropped columns, Remaining columns are; {list(ecom_data.columns)}')
+
+#Converting order_date format from str to datetime
+ecom_data['order_date']=pd.to_datetime(ecom_data['order_date'], errors='coerce')
+logging.info(f'Converting dtype of order_date column to datetime')
