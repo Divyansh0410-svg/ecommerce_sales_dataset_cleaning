@@ -28,6 +28,10 @@ ecom_data['order_date']=pd.to_datetime(ecom_data['order_date'], errors='coerce',
 ecom_data.dropna(subset=['order_date'], inplace=True)
 logging.info(f'Converting dtype of order_date column to datetime and dropping null values')
 
+#Replacing $ or , in price with nothing
+ecom_data['price']=(ecom_data['price'].astype(str).str.replace('$','',regex=False)
+                                                  .str.replace(',','',regex=False))
+
 #Converting columns like price,total and quantity to float and integer respectively 
 #and dropping columns with non numerical value
 ecom_data['quantity']=pd.to_numeric(ecom_data['quantity'], errors='coerce').astype('Int64')
@@ -47,6 +51,10 @@ else:
 
 #Removing space from category column values as well
 ecom_data['category']=ecom_data['category'].str.strip().str.lower()
+
+#Converting negative values to NaN
+ecom_data.loc[ecom_data['quantity'] <= 0, 'quantity'] = np.nan
+ecom_data.loc[ecom_data['price'] <= 0, 'price'] = np.nan
 
 #Dealing with null values in price quantity and total columns
 numeric_column=['price','quantity','total']
